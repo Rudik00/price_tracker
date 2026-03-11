@@ -36,3 +36,15 @@ venv/
 __pycache__/
 data/
 prices.db
+.DS_Store
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite
+*.db
+*.bak
+*.tmp
+*.swp
+*.swo
+*.swn

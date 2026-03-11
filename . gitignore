@@ -1,0 +1,36 @@
+# Системные файлы
+.DS_Store
+Thumbs.db
+.cache
+
+# IDE и редакторы
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Зависимости
+node_modules/
+vendor/
+/jspm_packages
+
+# Сборка и логи
+build/
+dist/
+out/
+*.log
+*.sqlite
+npm-debug.log*
+
+# Конфиденциальные данные
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+venv/
+__pycache__/

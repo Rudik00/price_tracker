@@ -2,3 +2,5 @@ fastapi
 uvicorn
 aiohttp
 apscheduler
+pydantic
+beautifulsoup4

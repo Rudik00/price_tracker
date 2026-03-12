@@ -56,3 +56,19 @@ def add_product(url: str, name: str):
     conn.close()
 
     return product_id
+
+
+def add_price(product_id: int, price: float):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO price_history (product_id, price)
+        VALUES (?, ?)
+        """,
+        (product_id, price)
+    )
+
+    conn.commit()
+    conn.close()

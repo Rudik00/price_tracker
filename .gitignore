@@ -50,4 +50,5 @@ prices.db
 *.swn
 
 # tests 
-scraper/wildberries/parser_test_main.py
+scraper/wildberries/catalog/parser_test_main.py
+scraper/wildberries/product/parser_test_main.py

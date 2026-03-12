@@ -1,12 +1,9 @@
-from models import Product
 from parser import parse_products
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from sorting import uniqueness_check
 
 
-def run(url: str, scrolls: int = 1) -> list[Product]:
-    products = []
+def run(url: str) -> list:
 
     with sync_playwright() as p:
         # для отладки можно запускать с headless=False, slow_mo=100
@@ -18,24 +15,12 @@ def run(url: str, scrolls: int = 1) -> list[Product]:
 
         page.goto(url)
 
-        for n in range(scrolls):
-            page.wait_for_timeout(5000)
-            page.mouse.wheel(0, 1000)
-            print(f"Прокрутили страницу {n+1} раз")
+        page.wait_for_timeout(2000)
 
         html = page.content()
         soup = BeautifulSoup(html, "html.parser")
         found = parse_products(soup)
 
-        products.extend(found)
-        print(f"найдено {len(found)} товаров (итого {len(products)})")
-
-        page.wait_for_timeout(5000)
         browser.close()
 
-        products = uniqueness_check(products)
-
-        for p in products:
-            print(p)
-
-    return products
+    return found

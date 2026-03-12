@@ -35,3 +35,24 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+
+def add_product(url: str, name: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO products (url, name)
+        VALUES (?, ?)
+        """,
+        (url, name)
+    )
+
+    conn.commit()
+
+    product_id = cursor.lastrowid
+
+    conn.close()
+
+    return product_id

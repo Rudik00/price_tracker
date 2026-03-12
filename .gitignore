@@ -48,3 +48,7 @@ prices.db
 *.swp
 *.swo
 *.swn
+
+# tests 
+scraper/wildberries/scraper_test_main.py
+

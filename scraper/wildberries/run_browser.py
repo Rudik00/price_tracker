@@ -1,7 +1,8 @@
-from .models import Product
-from .parser import parse_products
+from models import Product
+from parser import parse_products
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
+from sorting import uniqueness_check
 
 
 def run(url: str, scrolls: int = 1) -> list[Product]:
@@ -31,4 +32,10 @@ def run(url: str, scrolls: int = 1) -> list[Product]:
 
         page.wait_for_timeout(5000)
         browser.close()
+
+        products = uniqueness_check(products)
+
+        for p in products:
+            print(p)
+
     return products

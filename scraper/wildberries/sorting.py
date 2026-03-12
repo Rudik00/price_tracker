@@ -1,4 +1,4 @@
-from .models import Product
+from models import Product
 
 
 def uniqueness_check(
@@ -8,7 +8,7 @@ def uniqueness_check(
     unique = []
     seen = set()
     for p in products:
-        key = (p.id)
+        key = (p.url)
         if key not in seen:
             seen.add(key)
             unique.append(p)

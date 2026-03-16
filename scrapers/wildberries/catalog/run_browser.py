@@ -1,11 +1,11 @@
-from models import Product
-from parser import parse_products
+from .parser import parse_products
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from sorting import uniqueness_check
+from .sorting import uniqueness_check
+from app.db_service import add_products
 
 
-def run(url: str, scrolls: int = 1) -> list[Product]:
+def run(url: str, scrolls: int = 1) -> None:
     products = []
 
     with sync_playwright() as p:
@@ -35,4 +35,6 @@ def run(url: str, scrolls: int = 1) -> list[Product]:
 
         products = uniqueness_check(products)
 
-    return products
+        add_products(products)
+
+    return

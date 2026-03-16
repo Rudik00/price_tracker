@@ -1,1 +1,1 @@
-from . import waildberries
+from . import wildberries

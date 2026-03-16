@@ -1,4 +1,4 @@
-from models import Product
+from .models import Product
 
 
 def uniqueness_check(

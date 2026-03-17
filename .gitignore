@@ -53,3 +53,4 @@ prices.db
 scrapers/wildberries/catalog/parser_test_main.py
 scrapers/wildberries/product/parser_test_main.py
 test_tracker.py
+data/prices.db

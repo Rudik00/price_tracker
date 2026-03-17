@@ -2,6 +2,10 @@
 .DS_Store
 Thumbs.db
 .cache
+price_tracker.egg-info/PKG-INFO
+price_tracker.egg-info/SOURCES.txt
+price_tracker.egg-info/dependency_links.txt
+price_tracker.egg-info/top_level.txt
 
 # IDE и редакторы
 .idea/
@@ -54,3 +58,4 @@ scrapers/wildberries/catalog/parser_test_main.py
 scrapers/wildberries/product/parser_test_main.py
 test_tracker.py
 data/prices.db
+

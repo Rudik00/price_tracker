@@ -1,8 +1,14 @@
 import re
 
+from typing import Optional
+from bs4 import BeautifulSoup
 
-def parse_price(soup) -> float | None:
 
+def _parse_price_from_html(html: str) -> Optional[float]:
+    """Извлечение цены из HTML с помощью BeautifulSoup."""
+
+    soup = BeautifulSoup(html, "html.parser")
+    # 1) Попробуем классический вариант для wildberries.ru (priceBlockFinalPrice)
     price_elem = (
         soup.find(
             "ins",
@@ -22,5 +28,4 @@ def parse_price(soup) -> float | None:
     price = float(
         re.sub(r"[^\d,\.]", "", price_text).replace(",", ".")
     )
-
     return price

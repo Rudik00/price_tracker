@@ -1,26 +1,22 @@
-from .parser import parse_price
-from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright
 
 
-def run(url: str) -> float | None:
+async def _fetch_html_with_browser(browser, url: str, timeout: int = 60_000) -> str:
+    """Получение HTML-кода страницы с помощью Playwright (рендеринг JS)."""
 
-    with sync_playwright() as p:
+    page = await browser.new_page()
+    try:
+        # Устанавливаем user-agent, чтобы выглядеть как обычный браузер.
+        await page.set_extra_http_headers({
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        })
 
-        browser = p.chromium.launch(headless=True)
+        # Переходим на страницу (как в старом коде, без специального wait_until).
+        await page.goto(url, timeout=timeout)
 
-        page = browser.new_page()
+        # Ждем 2 секунды, как в старом коде.
+        await page.wait_for_timeout(2700)
 
-        page.goto(url)
+        return await page.content()
 
-        page.wait_for_timeout(2000)
-
-        html = page.content()
-
-        browser.close()
-
-    soup = BeautifulSoup(html, "html.parser")
-
-    price = parse_price(soup)
-
-    return price
+    finally:
+        await page.close()

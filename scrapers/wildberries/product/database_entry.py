@@ -23,8 +23,6 @@ async def check_price(product: dict, browser) -> None:
         # Синхронная запись в sqlite выполняем в потоке, чтобы не блокировать event loop.
         await asyncio.to_thread(add_price, product_id, price)
 
-        print(f"Saved price {price} for product {product_id}")
-
     except PlaywrightTimeoutError:
         print(f"Timeout while loading {url}")
 

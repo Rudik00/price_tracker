@@ -2,7 +2,7 @@ from .parser import parse_products
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 from .sorting import uniqueness_check
-from app.database import add_product
+from app.database import add_products
 
 
 def run(url: str, scrolls: int = 1) -> None:
@@ -35,6 +35,8 @@ def run(url: str, scrolls: int = 1) -> None:
 
         products = uniqueness_check(products)
 
-        add_product(products)
+        # Сохраняем весь список продуктов в базе данных
+        # (add_products ожидает список (url, name)).
+        add_products([(p.url, p.name) for p in products])
 
     return

@@ -2,7 +2,7 @@ from .models import Product
 import re
 
 
-def parse_products(soup):
+def parse_products(soup) -> list:
     # url, name, price
     found = []
     cards = soup.find_all("article", class_="product-card j-card-item j-analitics-item")

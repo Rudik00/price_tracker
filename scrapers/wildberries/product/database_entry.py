@@ -6,6 +6,14 @@ from .browser import _fetch_html_with_browser
 from .parser import _parse_price_from_html
 
 
+def _parser_price(html) -> float:
+    for _ in range(3):
+        price_now = _parse_price_from_html(html)
+
+        if price_now:
+            return price_now
+
+
 async def check_price(product: dict, browser) -> None:
     """Получить страницу товара, проанализировать цену и сохранить ее в базе данных."""
 
@@ -17,7 +25,7 @@ async def check_price(product: dict, browser) -> None:
 
     try:
         html = await _fetch_html_with_browser(browser, url)
-        price_now = _parse_price_from_html(html)
+        price_now = _parser_price(html)
 
         # проверка на None — если не удалось найти цену, не сохраняем запись в базу данных, но и не падаем.
         if price_now is None:

@@ -5,6 +5,16 @@ from .sorting import uniqueness_check
 from app.database import add_products
 
 
+def _parser(soup) -> list:
+    for _ in range(3):
+        found = parse_products(soup)
+
+        if len(found) != 0:
+            return found
+        
+    raise RuntimeError("Не удалось получить результат, после парсера пусто")
+
+
 def run(url: str, scrolls: int = 1) -> None:
     products = []
 
@@ -25,8 +35,8 @@ def run(url: str, scrolls: int = 1) -> None:
 
         html = page.content()
         soup = BeautifulSoup(html, "html.parser")
-        found = parse_products(soup)
-
+        found = _parser(soup=soup)
+        
         products.extend(found)
         print(f"найдено {len(found)} товаров (итого {len(products)})")
 

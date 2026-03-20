@@ -30,7 +30,9 @@ def init_db():
     CREATE TABLE IF NOT EXISTS price_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id INTEGER,
-        price REAL,
+        price_now REAL,
+        price_max REAL,
+        price_min REAL,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(product_id) REFERENCES products(id)
     )

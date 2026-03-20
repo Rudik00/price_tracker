@@ -35,7 +35,6 @@ async def check_price(product: dict, browser) -> None:
         if price_min is None and price_max is None:
             price_min = price_now
             price_max = price_now
-            print("вызвало создание цены ")
             await asyncio.to_thread(add_price, product_id, price_now, price_max, price_min)
             return
 
@@ -44,7 +43,6 @@ async def check_price(product: dict, browser) -> None:
             price_max = max(price_max, price_now)
 
         # Синхронная запись в sqlite выполняем в потоке, чтобы не блокировать event loop.
-        print("вызвало обновление цены")
         await asyncio.to_thread(update_price, product_id, price_now, price_max, price_min)
 
     except PlaywrightTimeoutError:

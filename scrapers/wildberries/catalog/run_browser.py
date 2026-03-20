@@ -21,7 +21,7 @@ def run(url: str, scrolls: int = 1) -> None:
         for n in range(scrolls):
             page.wait_for_timeout(5000)
             page.mouse.wheel(0, 1000)
-            print(f"Прокрутили страницу {n+1} раз")
+            print(f"Прокрутили страницу {n+1} раз из {scrolls}")
 
         html = page.content()
         soup = BeautifulSoup(html, "html.parser")

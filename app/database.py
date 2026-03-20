@@ -42,27 +42,6 @@ def init_db():
     conn.close()
 
 
-def add_product(url: str, name: str):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        INSERT INTO products (url, name)
-        VALUES (?, ?)
-        """,
-        (url, name)
-    )
-
-    conn.commit()
-
-    product_id = cursor.lastrowid
-
-    conn.close()
-
-    return product_id
-
-
 def add_products(products: list[tuple[str, str]]) -> None:
     """Добавляет несколько товаров в базу за один проход."""
 
@@ -84,16 +63,52 @@ def add_products(products: list[tuple[str, str]]) -> None:
     conn.close()
 
 
-def add_price(product_id: int, price: float):
+def get_price_stats(product_id: int) -> dict | None:
+    """Возвращает min/max цены из price_history для product_id."""
+
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         """
-        INSERT INTO price_history (product_id, price)
-        VALUES (?, ?)
+        SELECT
+            MIN(price_now) AS price_min,
+            MAX(price_now) AS price_max,
+            COUNT(*) AS count_rows
+        FROM price_history
+        WHERE product_id = ?
         """,
-        (product_id, price)
+        (product_id,),
+    )
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if row is None or row["count_rows"] == 0:
+        return None
+
+    return {
+        "price_min": row["price_min"],
+        "price_max": row["price_max"],
+    }
+
+
+def add_price(
+        product_id: int,
+        price_now: float,
+        price_max: float,
+        price_min: float,
+        ) -> None:
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO price_history (product_id, price_now, price_max, price_min)
+        VALUES (?, ?, ?, ?)
+        """,
+        (product_id, price_now, price_max, price_min)
     )
 
     conn.commit()

@@ -10,7 +10,7 @@ from scrapers.wildberries.product.start_parser_products import parser_products_m
 
 
 CATALOG_URL = "https://www.wildberries.ge/catalog/obuv/muzhskaya/kedy-i-krossovki"
-CATALOG_SCROLLS = 25
+CATALOG_SCROLLS = 30
 CATALOG_INTERVAL_HOURS = 72
 PRICE_INTERVAL_HOURS = 6
 

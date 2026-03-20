@@ -113,3 +113,26 @@ def add_price(
 
     conn.commit()
     conn.close()
+
+
+def update_price(
+        product_id: int,
+        price_now: float,
+        price_max: float,
+        price_min: float,
+) -> None:
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE price_history
+        SET price_now = ?, price_max = ?, price_min = ?
+        WHERE product_id = ?
+        """,
+        (price_now, price_max, price_min, product_id)
+    )
+
+    conn.commit()
+    conn.close()

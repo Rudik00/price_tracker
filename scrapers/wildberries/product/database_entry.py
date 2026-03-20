@@ -1,7 +1,7 @@
 import asyncio
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
-from app.database import add_price
+from app.database import add_price, update_price
 from .browser import _fetch_html_with_browser
 from .parser import _parse_price_from_html
 
@@ -32,18 +32,20 @@ async def check_price(product: dict, browser) -> None:
             print(f"Price not found for {url}")
             return
 
-        if price_min is None:
+        if price_min is None and price_max is None:
             price_min = price_now
+            price_max = price_now
+            print("вызвало создание цены ")
+            await asyncio.to_thread(add_price, product_id, price_now, price_max, price_min)
+            return
+
         else:
             price_min = min(price_min, price_now)
-
-        if price_max is None:
-            price_max = price_now
-        else:
             price_max = max(price_max, price_now)
 
         # Синхронная запись в sqlite выполняем в потоке, чтобы не блокировать event loop.
-        await asyncio.to_thread(add_price, product_id, price_now, price_max, price_min)
+        print("вызвало обновление цены")
+        await asyncio.to_thread(update_price, product_id, price_now, price_max, price_min)
 
     except PlaywrightTimeoutError:
         print(f"Timeout while loading {url}")

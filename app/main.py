@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from app.api import router
 from data.database import init_db
-from app.scheduler import (
+from scrapers.wildberries.scheduler.scheduler import (
     ensure_products_exist,
     run_price_check_once,
     start_scheduler,

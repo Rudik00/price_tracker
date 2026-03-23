@@ -1,3 +1,3 @@
 from . import api
-from . import database
+from ..data import database
 from . import models

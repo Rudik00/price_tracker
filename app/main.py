@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api import router
-from app.database import init_db
+from data.database import init_db
 from app.scheduler import (
     ensure_products_exist,
     run_price_check_once,

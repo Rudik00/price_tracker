@@ -2,7 +2,7 @@ from .parser import parse_products
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 from .sorting import uniqueness_check
-from app.database import add_products
+from data.database import add_products
 
 
 def _parser(soup) -> list:

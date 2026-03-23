@@ -4,7 +4,7 @@ from typing import Optional
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from app.database import get_connection
+from data.database import get_connection
 from scrapers.wildberries.catalog.run_browser import run as run_catalog
 from scrapers.wildberries.product.start_parser_products import parser_products_main
 

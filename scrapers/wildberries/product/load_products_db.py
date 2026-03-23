@@ -1,4 +1,4 @@
-from app.database import get_connection
+from data.database import get_connection
 
 
 def _load_products() -> list[dict]:

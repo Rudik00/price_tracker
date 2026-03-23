@@ -35,7 +35,6 @@ npm-debug.log*
 
 venv/
 __pycache__/
-data/
 prices.db
 .DS_Store
 *.pyc

@@ -1,7 +1,7 @@
 import asyncio
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
-from app.database import add_price, update_price
+from data.database import add_price, update_price
 from .browser import _fetch_html_with_browser
 from .parser import _parse_price_from_html
 

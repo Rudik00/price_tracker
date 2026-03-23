@@ -5,7 +5,8 @@ DB_PATH = Path("data/prices.db")
 
 
 def get_connection():
-    # Убедимся, что папка для БД существует (sqlite не создаст директорию автоматически).
+    # Убедимся, что папка для БД существует.
+    # sqlite не создаст директорию автоматически.
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     conn = sqlite3.connect(DB_PATH)
@@ -90,6 +91,43 @@ def add_products(products: list[tuple[str, str]]) -> None:
 
     conn.commit()
     conn.close()
+
+
+def add_product(url: str, name: str) -> int:
+    """Добавляет один товар и возвращает его product_id.
+
+    Если товар с таким URL уже есть, возвращает существующий id.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT OR IGNORE INTO products (url, name)
+        VALUES (?, ?)
+        """,
+        (url, name),
+    )
+
+    cursor.execute(
+        """
+        SELECT id FROM products
+        WHERE url = ?
+        LIMIT 1
+        """,
+        (url,),
+    )
+    row = cursor.fetchone()
+
+    conn.commit()
+    conn.close()
+
+    if row is None:
+        raise RuntimeError(
+            "Не удалось получить product_id после сохранения товара"
+        )
+
+    return int(row["id"])
 
 
 def get_price_stats(product_id: int) -> dict | None:

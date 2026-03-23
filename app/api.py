@@ -7,11 +7,10 @@ router = APIRouter()
 
 @router.post("/product")
 def create_product(product: ProductCreate):
+    print(product.url, product.name)
 
-    product_id = add_products(product.url, product.name)
+    add_products([(product.url, product.name)])
 
     return {
-        "id": product_id,
-        "url": product.url,
-        "name": product.name
+        "text": "hello"
     }

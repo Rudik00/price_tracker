@@ -4,9 +4,8 @@ from fastapi import FastAPI
 
 from app.api import router
 from data.database import init_db
-from scrapers.wildberries.scheduler.scheduler import (
-    ensure_products_exist,
-    run_price_check_once,
+from app.scheduler import (
+    startup_parse,
     start_scheduler,
     stop_scheduler,
 )
@@ -17,11 +16,8 @@ async def lifespan(app: FastAPI):
     # На запуске (startup)
     init_db()
 
-    # Если в базе нет ни одного товара — сначала парсим каталог.
-    await ensure_products_exist()
-
-    # Один раз проверяем цены сразу при старте.
-    await run_price_check_once()
+    # Всегда парсим каталог и цены при старте.
+    await startup_parse()
 
     # Затем запускаем планировщик для повторных задач.
     start_scheduler()

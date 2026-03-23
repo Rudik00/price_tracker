@@ -26,6 +26,26 @@ def init_db():
     )
     """)
 
+    # Удаляем дубли, оставляя запись с минимальным id для каждого URL.
+    cursor.execute(
+        """
+        DELETE FROM products
+        WHERE id NOT IN (
+            SELECT MIN(id)
+            FROM products
+            GROUP BY url
+        )
+        """
+    )
+
+    # Гарантируем уникальность URL на уровне БД.
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_products_url_unique
+        ON products (url)
+        """
+    )
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS price_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,8 +64,17 @@ def init_db():
 
 def add_products(products: list[tuple[str, str]]) -> None:
     """Добавляет несколько товаров в базу за один проход."""
-
     if not products:
+        return
+
+    # Отсекаем пустые URL и дубликаты в текущем батче.
+    unique_batch: dict[str, str] = {}
+    for url, name in products:
+        if not url:
+            continue
+        unique_batch[url] = name
+
+    if not unique_batch:
         return
 
     conn = get_connection()
@@ -53,10 +82,10 @@ def add_products(products: list[tuple[str, str]]) -> None:
 
     cursor.executemany(
         """
-        INSERT INTO products (url, name)
+        INSERT OR IGNORE INTO products (url, name)
         VALUES (?, ?)
         """,
-        products,
+        list(unique_batch.items()),
     )
 
     conn.commit()
@@ -99,7 +128,7 @@ def add_price(
         price_max: float,
         price_min: float,
         ) -> None:
-    
+
     conn = get_connection()
     cursor = conn.cursor()
 

@@ -4,7 +4,6 @@ from .models import Product
 def uniqueness_check(
     products: list[Product],
 ) -> list[Product]:
-    # убираем дубликаты по id товара
     unique = []
     seen = set()
     for p in products:

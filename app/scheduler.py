@@ -39,7 +39,7 @@ def _has_products() -> bool:
 async def _do_catalog_parse() -> None:
     """Парсит каталог и сохраняет товары в БД."""
 
-    print("[scheduler] запускаем парсер каталога")
+    print("\n\n\n[scheduler] запускаем парсер каталога")
     await asyncio.to_thread(run_catalog, CATALOG_URL, CATALOG_SCROLLS)
     print("[scheduler] парсер каталога завершён")
 
@@ -54,12 +54,7 @@ async def _run_catalog() -> None:
 async def _run_price_check() -> None:
     """Задача планировщика для проверки цен товаров."""
 
-    lock = _get_lock()
-    if lock.locked():
-        print("[scheduler] пропускаем проверку цен (идёт парсинг каталога)")
-        return
-
-    async with lock:
+    async with _get_lock():
         if not _has_products():
             print("[scheduler] товаров нет — запускаем парсер каталога перед проверкой")
             await _do_catalog_parse()
@@ -74,51 +69,65 @@ async def _run_price_check() -> None:
             print(f"[scheduler] ошибка при проверке цен: {exc}")
 
 
-async def ensure_products_exist() -> None:
-    """Гарантирует, что в базе есть хотя бы один товар."""
-
-    if _has_products():
-        return
+async def startup_parse() -> None:
+    """При старте всегда парсим каталог, затем цены."""
 
     async with _get_lock():
+        await _do_catalog_parse()
+
         if not _has_products():
-            await _do_catalog_parse()
+            print("[scheduler] товары не найдены — пропускаем проверку цен")
+            return
 
-
-async def run_price_check_once() -> None:
-    """Выполнить проверку цен один раз (без планировщика)."""
-
-    await _run_price_check()
+        try:
+            await parser_products_main()
+        except Exception as exc:  # noqa: BLE001
+            print(f"[scheduler] ошибка при проверке цен: {exc}")
 
 
 def start_scheduler() -> None:
     """Запускает планировщик задач (парсер каталога + проверка цен)."""
 
-    if scheduler.running:
-        return
-
-    # Парсинг каталога каждые 3 дня
+    # Парсинг каталога — первый запуск через полный интервал
+    # (каталог уже спарсен при старте).
     scheduler.add_job(
         _run_catalog,
         "interval",
         hours=CATALOG_INTERVAL_HOURS,
         id="catalog_parse_job",
-        next_run_time=datetime.datetime.now() + datetime.timedelta(hours=CATALOG_INTERVAL_HOURS),
-        max_instances=1,
+        next_run_time=(
+            datetime.datetime.now()
+            + datetime.timedelta(hours=CATALOG_INTERVAL_HOURS)
+        ),
+        coalesce=False,
+        misfire_grace_time=300,
+        max_instances=10,
+        replace_existing=True,
     )
 
-    # Проверка цен каждые 6 часов
+    # Проверка цен — первый запуск через полный интервал
+    # (цены уже проверены при старте).
     scheduler.add_job(
         _run_price_check,
         "interval",
         hours=PRICE_INTERVAL_HOURS,
         id="price_check_job",
-        next_run_time=datetime.datetime.now() + datetime.timedelta(hours=PRICE_INTERVAL_HOURS),
-        max_instances=1,
+        next_run_time=(
+            datetime.datetime.now()
+            + datetime.timedelta(hours=PRICE_INTERVAL_HOURS)
+        ),
+        coalesce=False,
+        misfire_grace_time=300,
+        max_instances=10,
+        replace_existing=True,
     )
 
     scheduler.start()
-    print("[scheduler] запущен (парсер каталога каждые 72ч; проверка цен каждые 6ч)")
+    print(
+        "[scheduler] запущен "
+        f"(парсер каталога каждые {CATALOG_INTERVAL_HOURS} ч; "
+        f"проверка цен каждые {PRICE_INTERVAL_HOURS} ч)"
+    )
 
 
 def stop_scheduler() -> None:

@@ -1,8 +1,13 @@
+import logging
+
 from .parser import parse_products
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 from .sorting import uniqueness_check
 from data.database import add_products
+
+
+logger = logging.getLogger(__name__)
 
 
 def _parser(soup) -> list:
@@ -31,14 +36,14 @@ def run(url: str, scrolls: int = 1) -> None:
         for n in range(scrolls):
             page.wait_for_timeout(5000)
             page.mouse.wheel(0, 1000)
-            print(f"Прокрутили страницу {n+1} раз из {scrolls}")
+            logger.info("Прокрутили страницу %s раз из %s", n + 1, scrolls)
 
         html = page.content()
         soup = BeautifulSoup(html, "html.parser")
         found = _parser(soup=soup)
         
         products.extend(found)
-        print(f"найдено {len(found)} товаров (итого {len(products)})")
+        logger.info("Найдено %s товаров (итого %s)", len(found), len(products))
 
         page.wait_for_timeout(5000)
         browser.close()

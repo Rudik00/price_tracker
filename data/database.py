@@ -184,6 +184,7 @@ def get_product_by_id(product_id: int) -> dict | None:
         """
         SELECT price_now, price_max, price_min FROM price_history
         WHERE product_id = ?
+        ORDER BY timestamp DESC
         LIMIT 1
         """,
         (product_id,),
@@ -191,7 +192,7 @@ def get_product_by_id(product_id: int) -> dict | None:
     row = cursor.fetchone()
     conn.close()
     if row is None:
-        return "Товара с таким ID не найден, цены отсутствуют"
+        return {"error": "Товара с таким ID не найден, цены отсутствуют"}
     return dict(row)
 
 
@@ -211,13 +212,14 @@ def get_product_by_url(url: str) -> dict | None:
     row = cursor.fetchone()
     if row is None:
         conn.close()
-        return "Такого товара нет в базе данных"
+        return {"error": "Такого товара нет в базе данных"}
 
     product_id = int(row["id"])
     cursor.execute(
         """
         SELECT price_now, price_max, price_min FROM price_history
         WHERE product_id = ?
+        ORDER BY timestamp DESC
         LIMIT 1
         """,
         (product_id,),
@@ -225,6 +227,6 @@ def get_product_by_url(url: str) -> dict | None:
     price_row = cursor.fetchone()
     conn.close()
     if price_row is None:
-        return "Товара с таким URL не найден, цены отсутствуют"
+        return {"error": "Товара с таким URL не найден, цены отсутствуют"}
 
     return dict(price_row)

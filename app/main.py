@@ -3,12 +3,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api import router
+from app.logging_config import setup_logging
 from data.database import init_db
 from app.scheduler import (
     startup_parse,
     start_scheduler,
     stop_scheduler,
 )
+
+
+setup_logging()
 
 
 @asynccontextmanager

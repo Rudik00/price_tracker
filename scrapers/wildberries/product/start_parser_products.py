@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from playwright.async_api import async_playwright
 from rich.progress import Progress
@@ -6,9 +7,12 @@ from .load_products_db import _load_products
 from .database_entry import check_price
 
 
-async def parser_products_main(products) -> None:
+logger = logging.getLogger(__name__)
+
+
+async def parser_products_main(products: list[dict]) -> None:
     """Точка входа: загрузка продуктов и одновременное выполнение всех проверок."""
-    print(f"Found {len(products)} products to check")
+    logger.info("Found %s products to check", len(products))
 
     # Ограничьте количество одновременно работающих сайтов
     semaphore = asyncio.Semaphore(10)
@@ -19,7 +23,7 @@ async def parser_products_main(products) -> None:
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(headless=True)
 
-            async def guarded_check(product):
+            async def guarded_check(product: dict):
                 async with semaphore:
                     await check_price(product, browser)
                     progress.update(task, advance=1)

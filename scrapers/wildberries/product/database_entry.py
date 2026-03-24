@@ -1,9 +1,13 @@
 import asyncio
+import logging
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from data.database import add_price, update_price
 from .browser import _fetch_html_with_browser
 from .parser import _parse_price_from_html
+
+
+logger = logging.getLogger(__name__)
 
 
 def _parser_price(html) -> float:
@@ -29,7 +33,7 @@ async def check_price(product: dict, browser) -> None:
 
         # проверка на None — если не удалось найти цену, не сохраняем запись в базу данных, но и не падаем.
         if price_now is None:
-            print(f"Price not found for {url}")
+            logger.warning("Price not found for %s", url)
             return
 
         if price_min is None and price_max is None:
@@ -46,7 +50,7 @@ async def check_price(product: dict, browser) -> None:
         await asyncio.to_thread(update_price, product_id, price_now, price_max, price_min)
 
     except PlaywrightTimeoutError:
-        print(f"Timeout while loading {url}")
+        logger.warning("Timeout while loading %s", url)
 
     except Exception as e:
-        print(f"Error checking {url}: {e}")
+        logger.exception("Error checking %s: %s", url, e)

@@ -1,4 +1,9 @@
+import logging
+
 from .models import Product
+
+
+logger = logging.getLogger(__name__)
 
 
 def uniqueness_check(
@@ -12,5 +17,5 @@ def uniqueness_check(
             seen.add(key)
             unique.append(p)
 
-    print(f"Сохранено {len(unique)} уникальных товаров")
+    logger.info("Сохранено %s уникальных товаров", len(unique))
     return unique

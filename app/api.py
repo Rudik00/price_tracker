@@ -9,6 +9,7 @@ router = APIRouter()
 @router.post("/product")
 async def create_product(product: ProductCreate):
     product_db = add_product(product.url, product.name)
+
     await parser_products_main([product_db])
 
     return {

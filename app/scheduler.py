@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import logging
 from typing import Optional
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -17,6 +18,7 @@ PRICE_INTERVAL_HOURS = 6
 
 scheduler = AsyncIOScheduler()
 _catalog_lock: Optional[asyncio.Lock] = None
+logger = logging.getLogger(__name__)
 
 
 def _get_lock() -> asyncio.Lock:
@@ -40,9 +42,9 @@ def _has_products() -> bool:
 async def _do_catalog_parse() -> None:
     """Парсит каталог и сохраняет товары в БД."""
 
-    print("\n\n\n[scheduler] запускаем парсер каталога")
+    logger.info("[scheduler] запускаем парсер каталога")
     await asyncio.to_thread(run_catalog, CATALOG_URL, CATALOG_SCROLLS)
-    print("[scheduler] парсер каталога завершён")
+    logger.info("[scheduler] парсер каталога завершён")
 
 
 async def _run_catalog() -> None:
@@ -57,11 +59,11 @@ async def _run_price_check() -> None:
 
     async with _get_lock():
         if not _has_products():
-            print("[scheduler] товаров нет — запускаем парсер каталога перед проверкой")
+            logger.info("[scheduler] товаров нет — запускаем парсер каталога перед проверкой")
             await _do_catalog_parse()
 
         if not _has_products():
-            print("[scheduler] после парсинга каталога товары не найдены — пропускаем проверку цен")
+            logger.warning("[scheduler] после парсинга каталога товары не найдены — пропускаем проверку цен")
             return
 
         try:
@@ -69,7 +71,7 @@ async def _run_price_check() -> None:
 
             await parser_products_main(products)
         except Exception as exc:  # noqa: BLE001
-            print(f"[scheduler] ошибка при проверке цен: {exc}")
+            logger.exception("[scheduler] ошибка при проверке цен: %s", exc)
 
 
 async def startup_parse() -> None:
@@ -79,14 +81,14 @@ async def startup_parse() -> None:
         await _do_catalog_parse()
 
         if not _has_products():
-            print("[scheduler] товары не найдены — пропускаем проверку цен")
+            logger.warning("[scheduler] товары не найдены — пропускаем проверку цен")
             return
 
         try:
             products = await asyncio.to_thread(_load_products)
             await parser_products_main(products)
         except Exception as exc:  # noqa: BLE001
-            print(f"[scheduler] ошибка при проверке цен: {exc}")
+            logger.exception("[scheduler] ошибка при проверке цен: %s", exc)
 
 
 def start_scheduler() -> None:
@@ -127,7 +129,7 @@ def start_scheduler() -> None:
     )
 
     scheduler.start()
-    print(
+    logger.info(
         "[scheduler] запущен "
         f"(парсер каталога каждые {CATALOG_INTERVAL_HOURS} ч; "
         f"проверка цен каждые {PRICE_INTERVAL_HOURS} ч)"
@@ -139,4 +141,4 @@ def stop_scheduler() -> None:
 
     if scheduler.running:
         scheduler.shutdown(wait=False)
-        print("[scheduler] остановлен")
+        logger.info("[scheduler] остановлен")

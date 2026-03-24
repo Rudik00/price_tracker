@@ -130,36 +130,6 @@ def add_product(url: str, name: str) -> int:
     return int(row["id"])
 
 
-def get_price_stats(product_id: int) -> dict | None:
-    """Возвращает min/max цены из price_history для product_id."""
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT
-            MIN(price_now) AS price_min,
-            MAX(price_now) AS price_max,
-            COUNT(*) AS count_rows
-        FROM price_history
-        WHERE product_id = ?
-        """,
-        (product_id,),
-    )
-
-    row = cursor.fetchone()
-    conn.close()
-
-    if row is None or row["count_rows"] == 0:
-        return None
-
-    return {
-        "price_min": row["price_min"],
-        "price_max": row["price_max"],
-    }
-
-
 def add_price(
         product_id: int,
         price_now: float,
@@ -203,3 +173,58 @@ def update_price(
 
     conn.commit()
     conn.close()
+
+
+def get_product_by_id(product_id: int) -> dict | None:
+    # Получаем цены по product_id
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT price_now, price_max, price_min FROM price_history
+        WHERE product_id = ?
+        LIMIT 1
+        """,
+        (product_id,),
+        )
+    row = cursor.fetchone()
+    conn.close()
+    if row is None:
+        return "Товара с таким ID не найден, цены отсутствуют"
+    return dict(row)
+
+
+def get_product_by_url(url: str) -> dict | None:
+    # Получаем id по url, а затем цены по id
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id FROM products
+        WHERE url = ?
+        LIMIT 1
+        """,
+        (url,),
+    )
+    row = cursor.fetchone()
+    if row is None:
+        conn.close()
+        return "Такого товара нет в базе данных"
+
+    product_id = int(row["id"])
+    cursor.execute(
+        """
+        SELECT price_now, price_max, price_min FROM price_history
+        WHERE product_id = ?
+        LIMIT 1
+        """,
+        (product_id,),
+    )
+    price_row = cursor.fetchone()
+    conn.close()
+    if price_row is None:
+        return "Товара с таким URL не найден, цены отсутствуют"
+
+    return dict(price_row)

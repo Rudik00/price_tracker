@@ -1,17 +1,18 @@
 from fastapi import APIRouter
 from data.database import add_product, get_product_by_id, get_product_by_url
 from app.models import ProductCreate
+from scrapers.wildberries.product.start_parser_products import parser_products_main
 
 router = APIRouter()
 
 
 @router.post("/product")
-def create_product(product: ProductCreate):
-
-    product_id = add_product(product.url, product.name)
+async def create_product(product: ProductCreate):
+    product_db = add_product(product.url, product.name)
+    await parser_products_main([product_db])
 
     return {
-        "product_id": product_id
+        "product_id": product_db["id"]
     }
 
 

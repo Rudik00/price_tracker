@@ -6,6 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from data.database import get_connection
 from scrapers.wildberries.catalog.run_browser import run as run_catalog
+from scrapers.wildberries.product.load_products_db import _load_products
 from scrapers.wildberries.product.start_parser_products import parser_products_main
 
 
@@ -64,7 +65,9 @@ async def _run_price_check() -> None:
             return
 
         try:
-            await parser_products_main()
+            products = await asyncio.to_thread(_load_products)
+
+            await parser_products_main(products)
         except Exception as exc:  # noqa: BLE001
             print(f"[scheduler] ошибка при проверке цен: {exc}")
 
@@ -80,7 +83,8 @@ async def startup_parse() -> None:
             return
 
         try:
-            await parser_products_main()
+            products = await asyncio.to_thread(_load_products)
+            await parser_products_main(products)
         except Exception as exc:  # noqa: BLE001
             print(f"[scheduler] ошибка при проверке цен: {exc}")
 

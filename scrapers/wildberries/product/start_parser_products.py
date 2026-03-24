@@ -6,11 +6,8 @@ from .load_products_db import _load_products
 from .database_entry import check_price
 
 
-async def parser_products_main() -> None:
+async def parser_products_main(products) -> None:
     """Точка входа: загрузка продуктов и одновременное выполнение всех проверок."""
-
-    products = await asyncio.to_thread(_load_products)
-
     print(f"Found {len(products)} products to check")
 
     # Ограничьте количество одновременно работающих сайтов
@@ -34,4 +31,5 @@ async def parser_products_main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(parser_products_main())
+    products = _load_products()
+    asyncio.run(parser_products_main(products))

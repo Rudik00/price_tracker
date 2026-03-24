@@ -93,7 +93,7 @@ def add_products(products: list[tuple[str, str]]) -> None:
     conn.close()
 
 
-def add_product(url: str, name: str) -> int:
+def add_product(url: str, name: str):
     """Добавляет один товар и возвращает его product_id.
 
     Если товар с таким URL уже есть, возвращает существующий id.
@@ -111,7 +111,7 @@ def add_product(url: str, name: str) -> int:
 
     cursor.execute(
         """
-        SELECT id FROM products
+        SELECT id, url FROM products
         WHERE url = ?
         LIMIT 1
         """,
@@ -127,7 +127,7 @@ def add_product(url: str, name: str) -> int:
             "Не удалось получить product_id после сохранения товара"
         )
 
-    return int(row["id"])
+    return dict(row)
 
 
 def add_price(
